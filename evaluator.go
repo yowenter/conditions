@@ -11,7 +11,7 @@ var (
 )
 
 // Evaluate takes an expr and evaluates it using given args
-func Evaluate(expr Expr, args map[string]interface{}) (bool, error) {
+func Evaluate(expr Expr, args interface{}) (bool, error) {
 	if expr == nil {
 		return false, fmt.Errorf("Provided expression is nil")
 	}
@@ -28,7 +28,7 @@ func Evaluate(expr Expr, args map[string]interface{}) (bool, error) {
 }
 
 // evaluateSubtree performs given expr evaluation recursively
-func evaluateSubtree(expr Expr, args map[string]interface{}) (Expr, error) {
+func evaluateSubtree(expr Expr, args interface{}) (Expr, error) {
 	if expr == nil {
 		return falseExpr, fmt.Errorf("Provided expression is nil")
 	}
@@ -57,28 +57,48 @@ func evaluateSubtree(expr Expr, args map[string]interface{}) (Expr, error) {
 		if err != nil {
 			return falseExpr, fmt.Errorf("Failed to resolve argument index %s: %s", n.Val, err.Error())
 		}
-		if _, ok := args[index]; !ok {
-			return falseExpr, fmt.Errorf("argument: %v not found", index)
+		argsKind := reflect.TypeOf(args).Kind()
+		var val interface{}
+
+		switch argsKind {
+		case reflect.Map:
+			argsMap, ok := args.(map[string]interface{})
+			if !ok {
+				return falseExpr, fmt.Errorf("Args: `%v` convert to map not ok", args)
+			}
+			if _, ok := argsMap[index]; !ok {
+				return falseExpr, fmt.Errorf("Argument: `%v` not found", index)
+			}
+			val, _ = argsMap[index]
+		case reflect.Struct:
+			ps := reflect.ValueOf(args)
+			fval := ps.FieldByName(index)
+			if !fval.IsValid() {
+				return falseExpr, fmt.Errorf("Argument: `%v` not found in args `%v`", index, args)
+			}
+			val = fval.Interface()
+		default:
+			return falseExpr, fmt.Errorf("Args: `%v` is not map or struct", args)
 		}
 
-		kind := reflect.TypeOf(args[index]).Kind()
+		kind := reflect.TypeOf(val).Kind()
 		switch kind {
 		case reflect.Int:
-			return &NumberLiteral{Val: float64(args[index].(int))}, nil
+			return &NumberLiteral{Val: float64(val.(int))}, nil
 		case reflect.Int32:
-			return &NumberLiteral{Val: float64(args[index].(int32))}, nil
+			return &NumberLiteral{Val: float64(val.(int32))}, nil
 		case reflect.Int64:
-			return &NumberLiteral{Val: float64(args[index].(int64))}, nil
+			return &NumberLiteral{Val: float64(val.(int64))}, nil
 		case reflect.Float32:
-			return &NumberLiteral{Val: float64(args[index].(float32))}, nil
+			return &NumberLiteral{Val: float64(val.(float32))}, nil
 		case reflect.Float64:
-			return &NumberLiteral{Val: float64(args[index].(float64))}, nil
+			return &NumberLiteral{Val: float64(val.(float64))}, nil
 		case reflect.String:
-			return &StringLiteral{Val: args[index].(string)}, nil
+			return &StringLiteral{Val: val.(string)}, nil
 		case reflect.Bool:
-			return &BooleanLiteral{Val: args[index].(bool)}, nil
+			return &BooleanLiteral{Val: val.(bool)}, nil
 		case reflect.Slice:
-			return &SliceStringLiteral{Val: args[index].([]string)}, nil
+			return &SliceStringLiteral{Val: val.([]string)}, nil
 		}
 		return falseExpr, fmt.Errorf("Unsupported argument %s type: %s", n.Val, kind)
 	}

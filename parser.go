@@ -83,9 +83,8 @@ func (p *Parser) scanWithMapping() (Token, string) {
 	case '$':
 		t, tt = p.scan()
 
-		if t == scanner.Float || t == scanner.Int {
+		if t == scanner.Ident {
 			tok = IDENT
-			tt = "$" + tt
 
 		} else {
 			tok = ILLEGAL
