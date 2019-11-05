@@ -139,6 +139,7 @@ func (p *Parser) scanWithMapping() (Token, string) {
 			tt = "<"
 			p.unscan()
 		}
+
 	case '=':
 		t, tt = p.scan()
 
@@ -176,6 +177,8 @@ func (p *Parser) scanWithMapping() (Token, string) {
 			tok = XOR
 		} else if ttU == "NAND" {
 			tok = NAND
+		} else if ttU == "CONTAINS" {
+			tok = CONTAINS
 		} else if ttU == "IN" {
 			tok = IN
 		} else if ttU == "NOT" {

@@ -20,20 +20,21 @@ const (
 	literalEnd
 
 	operatorBegin
-	AND   // AND
-	OR    // OR
-	EQ    // =
-	NEQ   // !=
-	LT    // <
-	LTE   // <=
-	GT    // >
-	GTE   // >=
-	NAND  // NAND
-	XOR   // XOR
-	EREG  // =~
-	NEREG // !~
-	IN    // IN
-	NOTIN // NOT IN
+	AND      // AND
+	OR       // OR
+	EQ       // =
+	NEQ      // !=
+	LT       // <
+	LTE      // <=
+	GT       // >
+	GTE      // >=
+	NAND     // NAND
+	XOR      // XOR
+	EREG     // =~
+	NEREG    // !~
+	IN       // IN
+	CONTAINS // CONTAINS
+	NOTIN    // NOT IN
 	operatorEnd
 
 	LPAREN // (
@@ -60,12 +61,13 @@ var tokens = [...]string{
 	GT:  ">",
 	GTE: ">=",
 
-	NAND:  "NAND",
-	XOR:   "XOR",
-	EREG:  "=~",
-	NEREG: "!~",
-	IN:    "IN",
-	NOTIN: "NOT IN",
+	NAND:     "NAND",
+	XOR:      "XOR",
+	EREG:     "=~",
+	NEREG:    "!~",
+	IN:       "IN",
+	CONTAINS: "CONTAINS",
+	NOTIN:    "NOT IN",
 
 	LPAREN: "(",
 	RPAREN: ")",
