@@ -3,17 +3,19 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/yowenter/conditions"
 )
 
 func main() {
-	// Our condition to check
+	// cccccOur condition to check
 	type people struct {
 		Name   string
 		Height int32
 		Male   bool
 		Goods  []string
+		Birth  time.Time
 	}
 
 	s := ` $Name == "test" AND $Height > 100 AND $Male == false`
@@ -69,4 +71,14 @@ func main() {
 		// ...
 	}
 	fmt.Printf("Condition: `%v`, Val: `%v`, Result: `%v`\n", contains, p2, r)
+
+	s3 := ` $Birth BEFORE 1`
+	beforeP := conditions.NewParser(strings.NewReader(s3))
+	beforeExpr, err := beforeP.Parse()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	r, err = conditions.Evaluate(beforeExpr, people{Birth: time.Now().Add(-time.Hour * 48)})
+	fmt.Println(r, err)
 }

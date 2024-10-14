@@ -168,7 +168,6 @@ func (p *Parser) scanWithMapping() (Token, string) {
 		tok = STRING
 	case scanner.Ident:
 		ttU := strings.ToUpper(tt)
-
 		if ttU == "AND" {
 			tok = AND
 		} else if ttU == "OR" {
@@ -179,6 +178,8 @@ func (p *Parser) scanWithMapping() (Token, string) {
 			tok = NAND
 		} else if ttU == "CONTAINS" {
 			tok = CONTAINS
+		} else if ttU == "BEFORE" {
+			tok = BEFORE
 		} else if ttU == "IN" {
 			tok = IN
 		} else if ttU == "NOT" {

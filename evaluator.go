@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var (
@@ -81,7 +82,9 @@ func evaluateSubtree(expr Expr, args interface{}) (Expr, error) {
 		default:
 			return falseExpr, fmt.Errorf("Args: `%v` is not map or struct", args)
 		}
-
+		if t, ok := val.(time.Time); ok {
+			return &TimeLiteral{Val: t}, nil
+		}
 		kind := reflect.TypeOf(val).Kind()
 		switch kind {
 		case reflect.Int:
@@ -134,6 +137,8 @@ func applyOperator(op Token, l, r Expr) (*BooleanLiteral, error) {
 		return applyIN(l, r)
 	case CONTAINS:
 		return applyContains(l, r)
+	case BEFORE:
+		return applyBefore(l, r)
 	case NOTIN:
 		return applyNOTIN(l, r)
 	case EREG:
@@ -180,6 +185,40 @@ func applyNOTIN(l, r Expr) (*BooleanLiteral, error) {
 	result, err := applyIN(l, r)
 	result.Val = !result.Val
 	return result, err
+}
+
+func applyBefore(l, r Expr) (*BooleanLiteral, error) {
+	switch t := l.(type) {
+	case *TimeLiteral:
+		dt, err := getTime(l)
+		if err != nil {
+			return nil, err
+		}
+
+		switch r.(type) {
+		case *NumberLiteral:
+			days, err := getNumber(r)
+			if err != nil {
+				return nil, err
+			}
+			dur := time.Duration(days) * time.Second * 86400
+			if time.Since(dt) > dur {
+				return &BooleanLiteral{
+					Val: true,
+				}, nil
+			} else {
+				return &BooleanLiteral{
+					Val: false,
+				}, nil
+			}
+
+		}
+	default:
+		return nil, fmt.Errorf("Can not evaluate Literal of unknow type %s %T", t, t)
+	}
+
+	return &BooleanLiteral{Val: false}, nil
+
 }
 
 // applyContains applies CONTAINS to l/r operations
@@ -520,6 +559,26 @@ func getBoolean(e Expr) (bool, error) {
 		return n.Val, nil
 	default:
 		return false, fmt.Errorf("Literal is not a boolean: %v", n)
+	}
+}
+
+// getTime performs type assertion and returns string value or error
+func getTime(e Expr) (time.Time, error) {
+	switch t := e.(type) {
+	case *TimeLiteral:
+		return t.Val, nil
+	default:
+		return time.Time{}, fmt.Errorf("Literal is not a time: %v", t)
+	}
+}
+
+// getTime performs type assertion and returns string value or error
+func getTimeDuration(e Expr) (time.Duration, error) {
+	switch t := e.(type) {
+	case *DurationLiteral:
+		return t.Val, nil
+	default:
+		return time.Second * 0, fmt.Errorf("Literal is not a time: %v", t)
 	}
 }
 

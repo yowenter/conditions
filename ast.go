@@ -153,11 +153,17 @@ type StringLiteral struct {
 func (l *StringLiteral) String() string { return Quote(l.Val) }
 
 // TimeLiteral represents a point-in-time literal.
+
+func (l *StringLiteral) Args() []string {
+	args := []string{}
+	return args
+}
+
 type TimeLiteral struct {
 	Val time.Time
 }
 
-func (l *StringLiteral) Args() []string {
+func (l *TimeLiteral) Args() []string {
 	args := []string{}
 	return args
 }
@@ -168,6 +174,11 @@ func (l *TimeLiteral) String() string { return l.Val.UTC().Format("2006-01-02 15
 // DurationLiteral represents a duration literal.
 type DurationLiteral struct {
 	Val time.Duration
+}
+
+func (l *DurationLiteral) Args() []string {
+	args := []string{}
+	return args
 }
 
 // String returns a string representation of the literal.

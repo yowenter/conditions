@@ -35,6 +35,7 @@ const (
 	IN       // IN
 	CONTAINS // CONTAINS
 	NOTIN    // NOT IN
+	BEFORE   // BEFORE
 	operatorEnd
 
 	LPAREN // (
@@ -67,6 +68,7 @@ var tokens = [...]string{
 	NEREG:    "!~",
 	IN:       "IN",
 	CONTAINS: "CONTAINS",
+	BEFORE:   "BEFORE",
 	NOTIN:    "NOT IN",
 
 	LPAREN: "(",
