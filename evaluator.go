@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -191,9 +192,25 @@ func applyContains(l, r Expr) (*BooleanLiteral, error) {
 	case *StringLiteral:
 		var a string
 		var b []string
+		var bb string
 		a, err = getString(r)
 		if err != nil {
 			return nil, err
+		}
+
+		var ltIsString bool
+		switch l.(type) {
+		case *StringLiteral:
+			ltIsString = true
+		}
+		if ltIsString {
+			bb, err = getString(l)
+			if err != nil {
+				return nil, err
+			}
+			return &BooleanLiteral{
+				Val: strings.Contains(bb, a),
+			}, nil
 		}
 
 		b, err = getSliceString(l)
